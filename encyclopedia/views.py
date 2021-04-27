@@ -16,7 +16,7 @@ class EditPage(forms.Form):
 
 def index(request):
     return render(request, "encyclopedia/index.html", {
-        "entries": util.list_entries()
+        "entries": util.list_entries(), "form": Search()
     })
 
 def entry(request, title):
@@ -25,7 +25,7 @@ def entry(request, title):
         page = util.get_entry(title)
         pageconvert = markdown2.markdown(page)
         return render(request, "encyclopedia/title.html", {
-            "title": title, "content": pageconvert
+            "title": title, "content": pageconvert, "form": Search()
         })
     else:
         return render(request, "encyclopedia/error.html", {
@@ -35,21 +35,32 @@ def entry(request, title):
 def search(request):
     if request.method == "GET":
         form = Search(request.GET)
+        entries_found = []
+        all_entries = util.list_entries()  
         if form.is_valid():
             search = form.cleaned_data["search"].lower()
-            entries = util.list_entries()
-            
-
-        return render(request,"encyclopedia/search.html", {
-            "search": Search()
-        })
-
-
+    
+            for i in all_entries:
+                if search.lower() == i.lower():
+                    page = util.get_entry(i)
+                    pageconvert = markdown2.markdown(page)
+                    return render(request, "encyclopedia/title.html", {
+                        "title": i, "content": pageconvert, "form": Search()
+                    })
+                if search.lower() in i.lower():
+                    entries_found.append(i)
+            return render(request, "encyclopedia/search.html", {
+                "results" : entries_found, "search": search, "form": Search()
+            })
+    return render(request, "encyclopedia/search.html", {
+        "results": "", "search":"","form": Search()
+    })
+    
 def new(request):
     if request.method == "GET":
         createpage = NewPage(request.GET)
         return render(request, "encyclopedia/new.html", {
-            "newpage": NewPage()
+            "newpage": NewPage(), "form":Search()
         } )
     else:
         createpage = NewPage(request.POST)
@@ -68,7 +79,7 @@ def new(request):
                     return entry(request,title)
         else:
             return render(request, "encyclopedia/new.html", {
-                "newpage": NewPage()
+                "newpage": NewPage(), "form": Search()
             })
 
 def edit(request, title):
