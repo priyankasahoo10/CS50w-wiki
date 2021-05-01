@@ -6,7 +6,7 @@
 
 {% block body %}
 
-<h1>Search Results for {{item}}</h1>
+<h1>Search Results for {{item}}:</h1>
 
  {% if results|length == 1 %}
         {{results|length}} result found: 
@@ -22,7 +22,7 @@
             <a href="{% url 'entry' result %}">{{ result }}</a>
         </li>
     {% empty %}
-        <h4>Not Found.</h4>
+        <h4>No results found.</h4>
     {% endfor %}
 </ul>
 
