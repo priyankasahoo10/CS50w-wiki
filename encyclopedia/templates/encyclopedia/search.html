@@ -5,15 +5,17 @@
 {% endblock %}
 
 {% block body %}
-<ul>
-    <h1>Search Results for {{item}}</h1>
 
-    {% if results|length == 1 %}
-       <li> {{results|length}} </li>
+<h1>Search Results for {{item}}</h1>
+
+ {% if results|length == 1 %}
+        {{results|length}} result found: 
     
     {% elif results|length > 1 %}
-        <li>{{ results|length }} </li>
+        {{ results|length }} results found: 
     {% endif %}
+
+<ul>
 
     {% for result in results %}
         <li>

@@ -7,7 +7,7 @@ from . import util
 import markdown2
 
 class Search(forms.Form):
-    item = forms.CharField(label="", widget=forms.TextInput(attrs={'placeholder':'Search Encyclopedia'}))
+    search = forms.CharField(label="", widget=forms.TextInput(attrs={'placeholder':'Search Encyclopedia'}))
 
 class NewPage(forms.Form):
     pagetitle = forms.CharField(label="Title")
@@ -40,19 +40,19 @@ def search(request):
         entries_found = []
         all_entries = util.list_entries()  
         if form.is_valid():
-            item = form.cleaned_data["item"].lower()
+            search = form.cleaned_data["search"].lower()
     
             for i in all_entries:
-                if item.lower() == i.lower():
+                if search.lower() == i.lower():
                     page = util.get_entry(i)
                     pageconvert = markdown2.markdown(page)
                     return render(request, "encyclopedia/title.html", {
                         "title": i, "content": pageconvert, "form": Search()
                     })
-                elif item.lower() in i.lower():
+                elif search.lower() in i.lower():
                     entries_found.append(i)
             return render(request, "encyclopedia/search.html", {
-                "results" : entries_found, "item": item, "form": Search()
+                "results" : entries_found, "item": search, "form": Search()
             })
         else:
             return render(request, "encyclopedia/search.html", {
