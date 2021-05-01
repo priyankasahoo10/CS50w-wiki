@@ -1,11 +1,13 @@
 import random
 from django import forms
+from django.urls import reverse
+from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from . import util
 import markdown2
 
 class Search(forms.Form):
-    search = forms.CharField(widget=forms.TextInput(attrs={'placeholder':'Search Encyclopedia'}))
+    item = forms.CharField(label="", widget=forms.TextInput(attrs={'placeholder':'Search Encyclopedia'}))
 
 class NewPage(forms.Form):
     pagetitle = forms.CharField(label="Title")
@@ -29,33 +31,37 @@ def entry(request, title):
         })
     else:
         return render(request, "encyclopedia/error.html", {
-            "message": "The requested page was not found."
+            "message": "The requested page was not found.", "form": Search()
         })
 
 def search(request):
-    if request.method == "GET":
-        form = Search(request.GET)
+    if request.method == "POST":
+        form = Search(request.POST)
         entries_found = []
         all_entries = util.list_entries()  
         if form.is_valid():
-            search = form.cleaned_data["search"].lower()
+            item = form.cleaned_data["item"].lower()
     
             for i in all_entries:
-                if search.lower() == i.lower():
+                if item.lower() == i.lower():
                     page = util.get_entry(i)
                     pageconvert = markdown2.markdown(page)
                     return render(request, "encyclopedia/title.html", {
                         "title": i, "content": pageconvert, "form": Search()
                     })
-                if search.lower() in i.lower():
+                elif item.lower() in i.lower():
                     entries_found.append(i)
             return render(request, "encyclopedia/search.html", {
-                "results" : entries_found, "search": search, "form": Search()
+                "results" : entries_found, "item": item, "form": Search()
             })
-    return render(request, "encyclopedia/search.html", {
-        "results": "", "search":"","form": Search()
+        else:
+            return render(request, "encyclopedia/search.html", {
+        "results": "", "item":"","form": Search()
     })
-    
+    return render(request, "encyclopedia/search.html", {
+        "results": "", "item":"","form": Search()
+    })
+
 def new(request):
     if request.method == "GET":
         createpage = NewPage(request.GET)
@@ -86,7 +92,7 @@ def edit(request, title):
     if request.method == "GET":
         page = util.get_entry(title)
         return render(request, "encyclopedia/edit.html", {
-            "title": title, "edit": EditPage(initial={'textarea':page})
+            "title": title, "edit": EditPage(initial={'textarea':page}), "form": Search()
         })
     else:
         form = EditPage(request.POST)

@@ -6,18 +6,18 @@
 
 {% block body %}
 <ul>
-    <h1>Search Results</h1>
+    <h1>Search Results for {{item}}</h1>
 
     {% if results|length == 1 %}
-        {{results|length}}
+       <li> {{results|length}} </li>
     
     {% elif results|length > 1 %}
-        {{results|length }}
+        <li>{{ results|length }} </li>
     {% endif %}
 
     {% for result in results %}
         <li>
-            <a href="{% url 'title' result %}">{{ result }}</a>
+            <a href="{% url 'entry' result %}">{{ result }}</a>
         </li>
     {% empty %}
         <h4>Not Found.</h4>
