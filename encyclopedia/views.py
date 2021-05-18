@@ -1,7 +1,5 @@
 import random
 from django import forms
-from django.urls import reverse
-from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from . import util
 import markdown2
@@ -14,7 +12,7 @@ class NewPage(forms.Form):
     content = forms.CharField(widget=forms.Textarea(attrs={'placeholder':'Enter Markdown Content.'}))
     
 class EditPage(forms.Form):
-    content = forms.CharField(widget=forms.Textarea())
+    content = forms.CharField(label="", widget=forms.Textarea())
 
 def index(request):
     return render(request, "encyclopedia/index.html", {
@@ -91,15 +89,16 @@ def new(request):
 def edit(request, title):
     if request.method == "GET":
         page = util.get_entry(title)
+        editform = EditPage(initial={'content':page, 'pagetitle':title})
         return render(request, "encyclopedia/edit.html", {
-            "title": title, "edit": EditPage(initial={'textarea':page}), "form": Search()
+            "title": title, "edit": editform, "form": Search()
         })
-    else:
-        form = EditPage(request.POST)
-        if form.is_valid():
-            textarea = form.cleaned_data["textarea"]
-            util.save_entry(title,textarea)
-            return entry(request,title)
+    
+    editform = EditPage(request.POST)
+    if editform.is_valid():
+        content = editform.cleaned_data["content"]
+        util.save_entry(title,content)
+        return entry(request,title)
 
 
 def randompage(request):
